@@ -15,6 +15,74 @@ Essa competição tem como desafio criar um benchmark que seja capaz de inferir 
 
 ## Registro de Conteúdos:
 
+### O que é a submissão
+
+A ideia da submissão é: atualizar o pacote [lm-evaluation-harness-competition](https://github.com/tiiuae/lm-evaluation-harness-competition) adicionando uma nova tarefa (sua proposta).
+A sua submissão pode incluir um novo dataset (não necessariamente), porém esse dataset não será submetido. Você deve fazer upload desse dataset no [HuggingFace](https://huggingface.co/new-dataset).
+
+A submissão é um arquivo zip chamado `submission.zip` que contém dois arquivos:
+- `evaluation.patch`: é um arquivo que mostra a diferença entre o seu repositório e o repositório original do `lm-evaluation-harness-competition`.
+- `metadata.yaml`: um arquivo contendo uma breve descrição da sua nova tarefa:
+	- `task_name`: nome da task (apenas uma descrição)
+	- `task_metric`: métrica da task, deve estar implementada
+	- `hf_token`: token do HF que dá permissão de leitura para o dataset criado
+
+### O que podemos alterar em uma "task"
+
+#### Dataset
+
+Podemos selecionar um dataset já existente ou criar um dataset de perguntas e respostas. Esse dataset deve conter textos que são passados como entrada para o modelo, e outros textos que são esperados como saída. Por exemplo, um dataset pode conter o registro:
+
+```
+{"question" : "Quando é 1+1?", "answer" : "2"}
+```
+
+
+#### Prompt engineering
+
+O dataset é composto por variáveis com valores textuais, por exemplo, um dataset de múltipla escolha pode conter a variável "question" e as possíveis respostas "choice0", "choice1", "choice2", "choice3", "choice4". Você pode fazer um prompt engineering para reescrever a entrada do modelo baseado nas variáveis presentes no seu dataset. Por exemplo:
+
+```jinja2
+"Question: {{question}}\nA) {{choice0}}\nB) {{choice1}}\nC) {{choice2}}\nD) {{choice3}}\nE) {{choice4}}\nAnswer:"
+```
+
+O prompt engineering pode ser feito usando o Jinja2 ou usando funções python.
+
+```python
+def wikitext_detokenizer(doc):
+    string = doc["page"]
+    # contractions
+    string = string.replace("s '", "s'")
+    string = re.sub(r"/' [0-9]/", r"/'[0-9]/", string)
+    ...
+    string = string.replace(" 's", "'s")
+
+    return string
+```
+
+#### Tipo de geração
+
+Devemos calcular as métricas baseadas nas palavras com maior probabilidade? Ou usando o valor da probabilidade?
+
+Podemos alterar o que é interpretado como "saída do modelo". 
+
+- `generate_until`: gera palavras sequencialmente (com temperatura 0 ou não) até encontrar um "END OF SEQUENCE" ou um tamanho máximo. Retorna essas palavras.
+- `loglikelihood`: retorna a probabilidade de gerar a palavra target condicionado ao texto de entrada. Também retorna se o target tem a maior probabilidade entre todas palavras.
+- `loglikelihood_rolling`: retorna a probabilidade de gerar **o input**. Isso mesmo, nesse tipo de geração não importa o output. Você quer saber o quão provável é o modelo gerar o texto de entrada. Isso é usado para calcular perplexity.
+- `multiple_choice`: entre as "alternativas" possíveis, retorna qual delas tem a maior probabilidade pelo modelo. Por exemplo, se existem 5 alternativas representadas pelas strings "A", "B", "C", "D", "E", e o seu modelo diz que a palavra de maior probabilidade é "gato", a predição não vai ser considerada essa, e sim vai ser a string que tem a maior probabilidade entre as 5 opções.
+
+Implementação da geração de output: [huggingface.py](https://github.com/EleutherAI/lm-evaluation-harness/blob/3bc7cc8a72c66bac8d5b830cb3ccec9a5f691b12/lm_eval/models/huggingface.py#L1357)
+
+#### Métrica
+
+Uma métrica é uma função python que recebe duas listas de textos. Uma lista é a de "documentos" e a outra é a de "predições". A métrica deve então verificar se cada predição é a adequada para cada documento. Métricas e tipos de geração podem se confundir um pouco. Algumas métricas implementadas na biblioteca:
+
+Implementação das métricas: [metrics.py](https://github.com/EleutherAI/lm-evaluation-harness/blob/main/lm_eval/api/metrics.py)
+
+#### Filtro
+
+Ainda não entendi...
+
 ## Registro das Reuniões:
 
 * 08/08:
