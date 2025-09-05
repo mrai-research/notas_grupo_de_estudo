@@ -93,6 +93,17 @@ Ainda não entendi...
         3. Pode ser interessante fazer uma avaliação robusta de benchmarks já existentes para entender como eles performam
         4. Uma ideia de contribuição seria fazer filtros, aumentaçoes e curadorias de benchmarks já existentes de forma a bsucar e entender os elementos relvantes apra o treinamento e generalização *posteriori* do modelo.
 
+* 05/09
+
+	* Discussões:
+		1. Ele não aprende sociologia
+		2. Respostas longas são altamente punidas
+		3. Modelos localmente em hadataset ```morai```
+		4. Script ```submission.sh``` para gerar automaticamente o zip para entrega
+		5. Problemas em rodar outra versão do dataset
+		5. **Próximos passos**: 
+	* Atribuições:
+
     * Atribuições:
         1. **Estudo de métricas e experimentações (Daniel e Bea)**: A ideia é entender qual é a proposta dos cálculos de métricas e como podemos investigar e focar nisso. A métrica é composta por uma soma ponderada de três componentes que devem ser 
         2. **Registro de Equipe (Giovanni)**: Entender como registrar a equipe e o que é necessário para participar e iniciar as submissões
